@@ -83,25 +83,33 @@ const Insert = async (req = require, res = response) => {
           });
         }
 
-        // let transporter = nodemailer.createTransport({
-        //   host: "smtp.gmail.com",
-        //   port: 587,
-        //   secure: false, // true for 465, false for other ports
-        //   auth: {
-        //     user: "", // generated ethereal user
-        //     pass: "", // generated ethereal password
-        //   },
-        // });
+        
+        let transporter = nodemailer.createTransport({
+          host: "smtp.gmail.com",
+          port: 587,
+          secure: false, // true for 465, false for other ports
+          auth: {
+            user: "lomasdentalcenter@gmail.com", // generated ethereal user
+            pass: "oqmsmkspaztvsmwt", // generated ethereal password
+          },
+        });
 
-        // transporter.sendMail({
-        //   from: '"', // sender address
-        //   to: data.correo, // list of receivers
-        //   subject: "Credenciales del sistema", // Subject line
-        //   text: `¡Hola`,
-        //   html: `<b>Usuario:${data.usuario} ,</b>
-        //        <b>Contraseña: Hola1234@
-        //        </b>`,
-        // });
+        transporter.sendMail({
+          from: '"LomasDentalCenter', // sender address
+          to: data.correo, // list of receivers
+          subject: "Credenciales del sistema", // Subject line
+          text: `
+          ¡Hola ${data.usuario}!
+            Te damos la bienvenida a Lomas Dental Center, nos sentimos orgullosos que seas nuestro colaborador,
+            seas mas que bienvenido a este gran equipo.
+            A partir de ahora podras ingresar a nuestro plataforma el usuario: y la contraseña temporal: 
+            Nota: Se te solicitara cambio de contraseña la primera vez que inicies sesion.
+            ¡Saludos del equipo de LomasDentalCenter!
+            Este es un mensaje automático de LomasDentalCenter, si recibiste este correo por error por favor elimínalo.`, // plain text body
+          html: `<b>Usuario:${data.usuario} ,</b>
+               <b>Contraseña: Hola1234@
+               </b>`,
+        });
 
         return res.json({
           ok: true,

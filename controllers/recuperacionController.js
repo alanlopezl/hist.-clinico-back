@@ -56,8 +56,8 @@ const recuperacioncorreo = async (req = require, res = response) => {
       port: 587,
       secure: false, // true for 465, false for other ports
       auth: {
-        user: "", // generated ethereal user
-        pass: "", // generated ethereal password
+        user: "lomasdentalcenter@gmail.com", // generated ethereal user
+        pass: "oqmsmkspaztvsmwt", // generated ethereal password
       },
     });
 
@@ -68,7 +68,7 @@ const recuperacioncorreo = async (req = require, res = response) => {
       text: "", // plain text body
       html: `<h4>!saludos!, Hemos recibido la solicitud para restablecer tu contraseña, si no has sido tu, omite este mensaje.</h4>
               <b>Usuario:${data.USUARIO}</b>
-             <b>Contraseña: ${data.CONTRASEÑA}
+             <b>Contraseña: ${data.PASSWORDD}
             </b>`,
     });
 
