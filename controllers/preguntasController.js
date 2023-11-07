@@ -74,6 +74,8 @@ const InsertPreguntaUsuario = async (req = require, res = response) => {
     consulta,
     [data.pregunta, data.usuario, data.respuesta],
     (error, results) => {
+      console.log(results);
+      console.log(error);
       if (error) {
         return res.json({
           ok: false,

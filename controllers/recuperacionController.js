@@ -12,6 +12,7 @@ const Recupreguntas = async (req = require, res = response) => {
     consulta,
     [data.pregunta, data.respuesta, data.usuario],
     (error, results) => {
+      console.log(results);
       if (error) {
         return res.json({
           ok: false,
@@ -80,7 +81,7 @@ const recuperacioncorreo = async (req = require, res = response) => {
 
 const Update = (req = request, res = response) => {
   let consulta =
-    "UPDATE tbl_role SET NOMBRE_ROL=?, ULT_MODIFICACION=? WHERE COD_ROL = ?";
+    "UPDATE tbl_role SET NOMBRE_ROL=?, ULT_MODIFICACION=? WHERE ID_ROL = ?";
 
   let data = req.body;
 

@@ -42,11 +42,12 @@ const Login = (req = request, res = response) => {
 
 const UpdatePass = async(req = require, res = response)=>{
 
-    let consulta = `update tbl_ms_usuario set CONTRASEÑA = ?,ESTADO = 'Activo' where COD_USUARIO = ?`;
-    let consultaHist = `INSERT INTO agrocomercial.tbl_ms_his_contrasena(COD_USUARIO, CONTRASENA) VALUES(?,?)`;
+    let consulta = `update tbl_ms_usuario set PASSWORDD = ?,ID_ESTADO = 1 where ID_USUARIO = ?`;
+    let consultaHist = `INSERT INTO tbl_ms_his_contrasena(ID_USUARIO, PASSWORDD) VALUES(?,?)`;
 
     let data = req.body;
     await db.query(consulta, [data.pass, data.id], (error, results) => {
+      console.log(results);
         if (error) {
           return res.json({
             ok: false,

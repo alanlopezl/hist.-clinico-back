@@ -113,9 +113,10 @@ const Insert = async (req = require, res = response) => {
 };
 
 const UpdatePass = async (req = require, res = response) => {
-  let verificacion = "select * from tbl_ms_usuario where CONTRASEÑA = ? and ID_USUARIO = ?";
-  let consulta = `update tbl_ms_usuario set CONTRASEÑA = ? where ID_USUARIO = ? and CONTRASEÑA = ?`;
-  let consultaHist = `INSERT INTO tbl_ms_his_contrasena(ID_USUARIO, CONTRASENA) VALUES(?,?)`;
+  console.log('llego');
+  let verificacion = "select * from tbl_ms_usuario where PASSWORDD = ? and ID_USUARIO = ?";
+  let consulta = `update tbl_ms_usuario set PASSWORDD = ? where ID_USUARIO = ? and PASSWORDD = ?`;
+  let consultaHist = `INSERT INTO tbl_ms_his_contrasena(ID_USUARIO, PASSWORDD) VALUES(?,?)`;
 
   let data = req.body;
 
@@ -135,6 +136,7 @@ const UpdatePass = async (req = require, res = response) => {
     consulta,
     [data.newpass, data.id, data.pass],
     (error, results) => {
+      console.log(result);
       if (error) {
         return res.json({
           ok: false,
@@ -200,7 +202,6 @@ const Update = (req = request, res = response) => {
 
 const Delete = (req = request, res = response) => {
 
-  console.log('Hola mundo');
   let consulta = "DELETE FROM tbl_ms_usuario WHERE ID_USUARIO=?";
   let id = req.params.id;
 

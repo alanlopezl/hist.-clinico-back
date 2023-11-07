@@ -72,7 +72,7 @@ const selectpermisos = (req = request, res = response) => {
 
     return res.json({
       ok: true,
-      data: menus,
+      data: menus
     });
   });
 };
@@ -80,11 +80,11 @@ const selectpermisos = (req = request, res = response) => {
 const Insert = async (req = require, res = response) => {
   let data = req.body;
 
-  let verifica =
-    "select * from tbl_ms_permiso where ID_ROL = ? and ID_OBJETO = ?";
+  let verifica ="select * from tbl_ms_permiso where ID_ROL = ? and ID_OBJETO = ?";
   let consulta = `INSERT INTO tbl_ms_permiso(ID_ROL,ID_OBJETO,INSERTAR,ACTUALIZAR,CONSULTAR,ELIMINAR)VALUES(?,?,?,?,?,?)`;
-
+console.log(data);
   await db.query(verifica, [data.rol, data.objeto], (error, results) => {
+    
     if (results.length > 0) {
       return res.json({
         ok: false,
@@ -102,6 +102,7 @@ const Insert = async (req = require, res = response) => {
         data.eliminar,
       ],
       (error, results) => {
+        console.log(results);
         if (error) {
           return res.json({
             ok: false,
