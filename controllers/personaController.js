@@ -241,6 +241,41 @@ const Update = (req = request, res = response) => {
   );
 };
 
+const UpdateMedico = (req = request, res = response) => {
+
+  let consulta = `UPDATE tbl_persona SET ID_TIPO_PERSONA = ?, PRIMER_NOMBRE=upper(?),SEGUNDO_NOMBRE=upper(?), PRIMER_APELLIDO=upper(?), SEGUNDO_APELLIDO=upper(?), DNI=?,FEC_NACIMIENTO=?, SEXO=? WHERE COD_PERSONA=?`;
+
+  let data = req.body;
+
+  db.query(
+    consulta,
+    [
+      data.idtipo,
+      data.primern,
+      data.segudon,
+      data.primera,
+      data.segundoa,
+      data.dni,
+      data.nacimiento,
+      data.sexo,
+      data.id,
+    ],
+    (error, results) => {
+      if (error) {
+        return res.json({
+          ok: false,
+          data: error,
+        });
+      }
+
+      return res.json({
+        ok: true,
+        data: results[0],
+      });
+    }
+  );
+};
+
 const UpdatePerfil = (req = request, res = response) => {
   let consulta = `UPDATE tbl_persona SET PRIMER_NOMBRE=?,SEGUNDO_NOMBRE=?, PRIMER_APELLIDO=?, SEGUNDO_APELLIDO=?, DNI=? WHERE COD_PERSONA=?`;
 
@@ -302,6 +337,7 @@ module.exports = {
   SelectId,
   SelectUsuario,
   SelectMedico,
-  InsertMedico
+  InsertMedico,
+  UpdateMedico
   
 };

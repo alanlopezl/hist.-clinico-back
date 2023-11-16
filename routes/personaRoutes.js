@@ -13,6 +13,7 @@ app.post('/personauser',verifyToken, controller.InsertUserPersona);
 app.post('/personaMedico',verifyToken, controller.InsertMedico);
 app.put('/persona',verifyToken, controller.Update);
 app.put('/personaperfil',verifyToken, controller.UpdatePerfil);
+app.put('/personaMedico',verifyToken, controller.UpdateMedico);
 app.delete('/persona/:id',verifyToken,controller.Delete)
 
 
