@@ -1,0 +1,14 @@
+const express = require('express');
+const app = express();
+
+const controller = require('../controllers/especialidadController');
+const {verifyToken} = require('../middlewares/VerifiyToken');
+
+app.get('/especialidad',verifyToken, controller.Select);
+app.get('/especialidad/:id',verifyToken, controller.Selectid);
+app.post('/especialidad',verifyToken, controller.Insert);
+app.put('/especialidad',verifyToken,controller.Update);
+app.delete('/especialidad/:id',verifyToken, controller.Delete);
+
+
+module.exports = app

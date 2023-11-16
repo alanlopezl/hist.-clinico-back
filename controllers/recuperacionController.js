@@ -12,7 +12,6 @@ const Recupreguntas = async (req = require, res = response) => {
     consulta,
     [data.pregunta, data.respuesta, data.usuario],
     (error, results) => {
-      console.log(results);
       if (error) {
         return res.json({
           ok: false,

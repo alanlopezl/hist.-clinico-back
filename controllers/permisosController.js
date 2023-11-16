@@ -82,7 +82,7 @@ const Insert = async (req = require, res = response) => {
 
   let verifica ="select * from tbl_ms_permiso where ID_ROL = ? and ID_OBJETO = ?";
   let consulta = `INSERT INTO tbl_ms_permiso(ID_ROL,ID_OBJETO,INSERTAR,ACTUALIZAR,CONSULTAR,ELIMINAR)VALUES(?,?,?,?,?,?)`;
-console.log(data);
+
   await db.query(verifica, [data.rol, data.objeto], (error, results) => {
     
     if (results.length > 0) {
@@ -102,7 +102,6 @@ console.log(data);
         data.eliminar,
       ],
       (error, results) => {
-        console.log(results);
         if (error) {
           return res.json({
             ok: false,

@@ -47,7 +47,6 @@ const UpdatePass = async(req = require, res = response)=>{
 
     let data = req.body;
     await db.query(consulta, [data.pass, data.id], (error, results) => {
-      console.log(results);
         if (error) {
           return res.json({
             ok: false,

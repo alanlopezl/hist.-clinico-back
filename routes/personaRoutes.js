@@ -4,14 +4,16 @@ const app = express();
 const controller = require('../controllers/personaController');
 const {verifyToken} = require('../middlewares/VerifiyToken');
 
-app.get('/persona', controller.Select);
-app.get('/personausuario', controller.SelectUsuario);
-app.get('/personaid/:id', controller.SelectId);
-app.post('/persona', controller.Insert);
-app.post('/personauser', controller.InsertUserPersona);
-app.put('/persona', controller.Update);
-app.put('/personaperfil', controller.UpdatePerfil);
-app.delete('/persona/:id',controller.Delete)
+app.get('/persona', verifyToken,controller.Select);
+app.get('/personaMedico', verifyToken,controller.SelectMedico);
+app.get('/personausuario', verifyToken,controller.SelectUsuario);
+app.get('/personaid/:id',verifyToken, controller.SelectId);
+app.post('/persona',verifyToken, controller.Insert);
+app.post('/personauser',verifyToken, controller.InsertUserPersona);
+app.post('/personaMedico',verifyToken, controller.InsertMedico);
+app.put('/persona',verifyToken, controller.Update);
+app.put('/personaperfil',verifyToken, controller.UpdatePerfil);
+app.delete('/persona/:id',verifyToken,controller.Delete)
 
 
 module.exports = app;

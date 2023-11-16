@@ -48,7 +48,7 @@ const SelectUser = (req = request, res = response) => {
         msg: error,
       });
     }
-    console.log(results);
+    
     return res.json({
       ok: true,
       data: results,
@@ -64,7 +64,7 @@ const Insert = async (req = require, res = response) => {
 
   await db.query(verificacion, [data.usuario], (error, results) => {
 
-    console.log(results);
+
     if (results.length > 0) {
       return res.json({
         ok: false,
@@ -121,7 +121,7 @@ const Insert = async (req = require, res = response) => {
 };
 
 const UpdatePass = async (req = require, res = response) => {
-  console.log('llego');
+  
   let verificacion = "select * from tbl_ms_usuario where PASSWORDD = ? and ID_USUARIO = ?";
   let consulta = `update tbl_ms_usuario set PASSWORDD = ? where ID_USUARIO = ? and PASSWORDD = ?`;
   let consultaHist = `INSERT INTO tbl_ms_his_contrasena(ID_USUARIO, PASSWORDD) VALUES(?,?)`;
@@ -131,7 +131,7 @@ const UpdatePass = async (req = require, res = response) => {
   db.query(verificacion,[data.newpass,data.id],(error,result)=>{
    
 
-    console.log(result.length);
+    
     if (result.length > 0) {
       return res.json({
         ok: false,
@@ -144,7 +144,7 @@ const UpdatePass = async (req = require, res = response) => {
     consulta,
     [data.newpass, data.id, data.pass],
     (error, results) => {
-      console.log(result);
+  
       if (error) {
         return res.json({
           ok: false,
@@ -214,8 +214,6 @@ const Delete = (req = request, res = response) => {
   let id = req.params.id;
 
   db.query(consulta, [id], (error, results) => {
-    console.log(results);
-    console.log(error);
     if (error) return res.json({ ok: false, data: error });
 
     return res.json({

@@ -11,6 +11,15 @@ app.use(require('./usuariosRoutes'));
 app.use(require('./permisosRoutes'));
 app.use(require('./parametrosRoutes'));
 app.use(require('./recuperacionRoutes'));
+app.use(require('./estadoRoutes'));
+app.use(require('./tipoPersonaRoutes'));
+app.use(require('./pacientesRoutes'));
+app.use(require('./especialidadRoutes'));
+app.use(require('./estadoCitaRoutes'));
+app.use(require('./citasRoutes'));
+
+
+
 
 
 module.exports = app;

@@ -1,0 +1,17 @@
+const express = require('express');
+const app = express();
+
+const controller = require('../controllers/citasController');
+const {verifyToken} = require('../middlewares/VerifiyToken');
+
+//CRUD 
+app.get('/cita',verifyToken, controller.Select);  //MOSTRAR
+app.get('/cita/:id/:espe',verifyToken, controller.Selectidespe);  //MOSTRAR
+
+app.post('/cita',verifyToken, controller.Insert); //CREAR
+app.put('/cita',verifyToken, controller.Update);  //  ACCTUALIZAR
+app.delete('/cita/:id',verifyToken, controller.Delete); //ELIMIAR
+
+
+
+module.exports = app;
