@@ -325,7 +325,30 @@ const Delete = (req = request, res = response) => {
       data: results[0],
     });
   });
+
 };
+
+const SelectM =  (req = request, res = response) => {
+  let id = req.params.id;
+
+  let consulta = "select * from tbl_especialidad_medico tem inner join tbl_persona tp on tem.COD_PERSONA = tp.COD_PERSONA where tem.ID_ESPECIALIDAD = ?";
+   db.query(consulta,[id],(error, results) => {
+console.log(results);
+    if (error) {
+      return res.json({
+        ok: false,
+        msg: error
+      });
+    }
+
+    return res.json({
+      ok: true,
+      data: results
+    });
+  })
+};
+
+
 
 module.exports = {
   Select,
@@ -338,6 +361,7 @@ module.exports = {
   SelectUsuario,
   SelectMedico,
   InsertMedico,
-  UpdateMedico
+  UpdateMedico,
+  SelectM
   
 };

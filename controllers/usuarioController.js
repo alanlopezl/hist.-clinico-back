@@ -127,6 +127,7 @@ const UpdatePass = async (req = require, res = response) => {
   let consultaHist = `INSERT INTO tbl_ms_his_contrasena(ID_USUARIO, PASSWORDD) VALUES(?,?)`;
 
   let data = req.body;
+  console.log(data);
 
   db.query(verificacion,[data.newpass,data.id],(error,result)=>{
    

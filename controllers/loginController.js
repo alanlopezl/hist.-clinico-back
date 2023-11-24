@@ -46,17 +46,18 @@ const UpdatePass = async(req = require, res = response)=>{
     let consultaHist = `INSERT INTO tbl_ms_his_contrasena(ID_USUARIO, PASSWORDD) VALUES(?,?)`;
 
     let data = req.body;
+    console.log(data);
     await db.query(consulta, [data.pass, data.id], (error, results) => {
         if (error) {
           return res.json({
             ok: false,
-            data: error,
+            data: error
           });
         }
         db.query(consultaHist, [data.id, data.pass], (error, result) => {
           return res.json({
             ok: true,
-            data: results,
+            data: results
           });
         });
       });

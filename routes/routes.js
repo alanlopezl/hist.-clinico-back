@@ -17,6 +17,8 @@ app.use(require('./pacientesRoutes'));
 app.use(require('./especialidadRoutes'));
 app.use(require('./estadoCitaRoutes'));
 app.use(require('./citasRoutes'));
+app.use(require('./reportesRoutes'));
+
 
 
 

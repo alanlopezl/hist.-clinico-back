@@ -44,6 +44,7 @@ const Selectidespe = (req = request, res=response) => {
     let { busqueda } = req.query;
     let { id,espe } = req.params;
 
+    console.log(id,espe);
      let consulta = `select * from tbl_citas tc inner join tbl_persona tp on tc.ID_PACIENTE = tp.COD_PERSONA where tc.ID_MEDICO  = ? and tc.ID_ESPECIALIDAD = ?`;
         
      if (busqueda != ''){
