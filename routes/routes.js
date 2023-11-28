@@ -18,6 +18,10 @@ app.use(require('./especialidadRoutes'));
 app.use(require('./estadoCitaRoutes'));
 app.use(require('./citasRoutes'));
 app.use(require('./reportesRoutes'));
+app.use(require('./enfermedadRoutes'));
+app.use(require('./cuestionarioRoutes'));
+
+
 
 
 
