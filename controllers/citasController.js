@@ -71,12 +71,12 @@ const Insert = async(req = require, res = response)=>{
     let data = req.body;
      
     let consulta = `INSERT INTO tbl_citas
-    (ID_MEDICO, ID_PACIENTE, ID_ESTADO_CITA, ID_ESPECIALIDAD,MOTIVO, OBSERVACION, FECHA_CITA)
-    VALUES(?,?,?,?,upper(?),upper(?),?)`;
+    (ID_MEDICO, ID_PACIENTE, ID_ESTADO_CITA, ID_ESPECIALIDAD,MOTIVO, FECHA_CITA)
+    VALUES(?,?,?,?,upper(?),?)`;
 
   
 
-         db.query(consulta, [data.medico,data.paciente,data.estado,data.especialidad,data.motivo,data.observacion,data.fecha], (error, results)=>{
+         db.query(consulta, [data.medico,data.paciente,data.estado,data.especialidad,data.motivo,data.fecha], (error, results)=>{
 
             if (error) {
                 return res.json({
