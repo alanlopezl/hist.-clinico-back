@@ -50,7 +50,6 @@ const Selectidespe = (req = request, res=response) => {
      if (busqueda != ''){
        consulta = consulta + ` or UPPER(tp.PRIMER_NOMBRE) LIKE '%${busqueda.toUpperCase()}%'`
      }
-  console.log(consulta);
    
      db.query(consulta, [id,espe],(error, results) => {
 
