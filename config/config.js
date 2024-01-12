@@ -7,7 +7,8 @@ const db = mysql.createPool({
     host: 'localhost',
     user: 'root',
     password: '',
-    database: 'historialclinico',
+    database: 'historial_clinico(7)',
+    port: '3306',
     wait_timeout : 28800,
     connect_timeout :10
 });

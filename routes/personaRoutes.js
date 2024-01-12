@@ -15,6 +15,7 @@ app.put('/persona',verifyToken, controller.Update);
 app.put('/personaperfil',verifyToken, controller.UpdatePerfil);
 app.put('/personaMedico',verifyToken, controller.UpdateMedico);
 app.delete('/persona/:id',verifyToken,controller.Delete)
+app.delete('/personaMedico/:id',verifyToken,controller.DeleteMedico)
 app.get('/personaM/:id',verifyToken, controller.SelectM);
 
 

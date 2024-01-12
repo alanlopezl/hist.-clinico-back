@@ -327,6 +327,26 @@ const Delete = (req = request, res = response) => {
   });
 
 };
+const DeleteMedico = (req = request, res = response) => {
+  let consulta = "CALL eliminarPersonas(?)";
+
+  let id = req.params.id;
+
+  db.query(consulta, [id], (error, results) => {
+    if (error) {
+      return res.json({
+        ok: false,
+        data: error,
+      });
+    }
+
+    return res.json({
+      ok: true,
+      data: results[0],
+    });
+  });
+
+};
 
 const SelectM =  (req = request, res = response) => {
   let id = req.params.id;
@@ -359,6 +379,7 @@ module.exports = {
   UpdatePerfil,
   SelectId,
   SelectUsuario,
+  DeleteMedico,
   SelectMedico,
   InsertMedico,
   UpdateMedico,

@@ -8,6 +8,9 @@ app.get('/pacientes',verifyToken, controller.Select);
 app.get('/cuestionario',verifyToken, controller.SelectCuestio);
 app.get('/enfermedad',verifyToken, controller.SelectEnfer);
 
+app.delete('/pacientes/:id',verifyToken, controller.Delete);
+app.put('/pacientes', verifyToken,controller.UpdatePaciente);
+
 app.post('/cuestionario',verifyToken, controller.Insert);
 app.post('/pacientes',verifyToken, controller.InsertMedico);
 
