@@ -11,6 +11,7 @@ app.get('/cita/:id/:espe',verifyToken, controller.Selectidespe);  //MOSTRAR
 app.post('/cita',verifyToken, controller.Insert); //CREAR
 app.put('/cita',verifyToken, controller.Update);  //  ACCTUALIZAR
 app.delete('/cita/:id',verifyToken, controller.Delete); //ELIMIAR
+//app.delete('/cita/:id',verifyToken, controller.DeleteCita); //ELIMIAR
 
 
 

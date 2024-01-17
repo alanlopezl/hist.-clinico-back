@@ -82,6 +82,8 @@ const InsertMedico = async (req = require, res = response) => {
   let consulta = `INSERT INTO tbl_persona (ID_TIPO_PERSONA,PRIMER_NOMBRE, SEGUNDO_NOMBRE, PRIMER_APELLIDO, SEGUNDO_APELLIDO, DNI, FEC_NACIMIENTO, SEXO)
   VALUES(?,upper(?),upper(?),upper(?),upper(?),?,?,?)`;
 
+  
+
   await db.query(verificacion, [data.dni], (error, results) => {
     if (results.length > 0) {
       return res.json({
@@ -89,6 +91,15 @@ const InsertMedico = async (req = require, res = response) => {
         msg: "Ya existe una persona con el DNI " + data.dni,
       });
     }
+
+     // VALIDAR DNI Y TÉLEFONO FOCK
+   if(data.dni.includes('0000000000000')) {
+    return res.json({
+      msg: true,
+      ok: false,
+      msg: `No se permiten solo 0 en DNI.`,
+    });
+  }
     db.query(
       consulta,
       [
@@ -165,15 +176,28 @@ const InsertUserPersona = async (req = require, res = response) => {
 
   let verificacion = "select * from tbl_persona where DNI = ?";
   let consulta = `call RegistroUsuario(?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+  
+   
 
   await db.query(verificacion, [data.DNI], (error, results) => {
 
+   
     if (results.length > 0) {
       return res.json({
         ok: false,
         msg: "Ya existe una persona con el DNI " + data.DNI
       });
     }
+      
+     // VALIDAR DNI 
+     if(data.dni.includes('0000000000000')) {
+      return res.json({
+        msg: true,
+        ok: false,
+        msg: `No se permiten solo 0 en DNI.`,
+      });
+    }
+    
     db.query(
       consulta,
       [

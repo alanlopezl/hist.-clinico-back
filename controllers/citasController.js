@@ -128,9 +128,27 @@ const Update = async(req = request, res=response) => {
 
    
 }
+/*
 const Delete = (req=request,res=response) =>{
 
     let consulta = 'DELETE FROM tbl_ms_rol WHERE ID_ROL=?';
+    let id = req.params.id;
+
+    db.query(consulta, [id], (error, results) => {
+
+        if (error) return res.json({ ok:false, data: error });
+
+        return res.json({
+            ok: true,
+            data: results
+
+        });
+    });
+}*/
+
+const Delete= (req=request,res=response) =>{
+
+    let consulta = "DELETE FROM tbl_citas WHERE ID_CITA=?";
     let id = req.params.id;
 
     db.query(consulta, [id], (error, results) => {

@@ -62,12 +62,23 @@ const InsertMedico = async (req = require, res = response) => {
   let consulta = `INSERT INTO tbl_persona (ID_TIPO_PERSONA,PRIMER_NOMBRE, SEGUNDO_NOMBRE, PRIMER_APELLIDO, SEGUNDO_APELLIDO, DNI, FEC_NACIMIENTO, SEXO)
     VALUES(?,upper(?),upper(?),upper(?),upper(?),?,?,?)`;
 
+        // VALIDAR DNI Y TÉLEFONO FOCK
+        if(data.dni.includes('0000000000000')) {
+          return res.json({
+            msg: true,
+            ok: false,
+            msg: `No se permiten solo 0 en DNI.`,
+          });
+        }
+   
   await db.query(verificacion, [data.dni], (error, results) => {
     if (results.length > 0) {
       return res.json({
         ok: false,
         msg: "Ya existe una persona con el DNI " + data.dni,
       });
+
+    
     }
     db.query(
       consulta,
@@ -100,11 +111,14 @@ const InsertMedico = async (req = require, res = response) => {
 const Insert = async (req = require, res = response) => {
   
   let data = req.body;
+
+
   let { cuest,enfer } = data;
 
   let consulta = `INSERT INTO tbl_persona_cuestionario (ID_CUESTIONARIO, COD_PERSONA, RESP)VALUES ? `;
   let consulta1 = `INSERT INTO tbl_enfermedad_paciente (COD_PERSONA, ID_ENFERMEDAD, RESP) VALUES ? `;
 
+  
 
   let todo = [];
   let todo1 = [];
@@ -150,6 +164,8 @@ const UpdatePaciente = (req = request, res = response) => {
   let consulta = `UPDATE tbl_persona SET ID_TIPO_PERSONA = ?, PRIMER_NOMBRE=upper(?),SEGUNDO_NOMBRE=upper(?), PRIMER_APELLIDO=upper(?), SEGUNDO_APELLIDO=upper(?), DNI=?,FEC_NACIMIENTO=?, SEXO=? WHERE COD_PERSONA=?`;
 
   let data = req.body;
+
+   
 
   db.query(
     consulta,
