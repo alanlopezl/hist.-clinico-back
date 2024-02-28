@@ -6,6 +6,7 @@ const {verifyToken} = require('../middlewares/VerifiyToken');
 
 app.get('/pacientes',verifyToken, controller.Select);
 app.get('/cuestionario',verifyToken, controller.SelectCuestio);
+app.get('/getAnswers/:idPaciente',verifyToken, controller.getAnswers);
 app.get('/enfermedad',verifyToken, controller.SelectEnfer);
 
 app.delete('/pacientes/:id',verifyToken, controller.Delete);

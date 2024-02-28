@@ -2,6 +2,8 @@ const { response, request } = require("express");
 const db = require("../config/config");
 const { desects } = require("../helpers/helpers");
 const nodemailer = require("nodemailer");
+const jwt = require("jsonwebtoken");
+
 
 const Recupreguntas = async (req = require, res = response) => {
   let consulta = `call RecuConfigPreguntas(?,?,?)`;
@@ -60,6 +62,12 @@ const recuperacioncorreo = async (req = require, res = response) => {
       },
     });
 
+    const payload = {
+      id: data.USUARIO
+    }
+  
+    const token = jwt.sign(payload, "correoReset1234.", { expiresIn: "10m" });
+
     transporter.sendMail({
       from: '"', // sender address
       to: data.EMAIL, // list of receivers
@@ -67,7 +75,9 @@ const recuperacioncorreo = async (req = require, res = response) => {
       text: "", // plain text body
       html: `<h4>!saludos!, Hemos recibido la solicitud para restablecer tu contraseña, si no has sido tu, omite este mensaje.</h4>
               <b>Usuario:${data.USUARIO}</b>
-             <b>Contraseña: ${data.PASSWORDD}
+              <br>
+              <a href="${process.env.DOMINIO_PAG}/contraseña/${token}">Recuperar contraseña</a><br><br>
+              <span style="font-size: 12px;">El enlace expirará en 10 minutos.</span>
             </b>`,
     });
 
@@ -77,6 +87,17 @@ const recuperacioncorreo = async (req = require, res = response) => {
     });
   });
 };
+
+const revalidarTokenCorreo = async(req = request, res = response) => {
+
+  const { id } = req;
+
+  return res.json({
+      ok: true,
+      id_usuario: id,
+  });
+
+}
 
 const Update = (req = request, res = response) => {
   let consulta =
@@ -103,4 +124,5 @@ module.exports = {
   Recupreguntas,
   Update,
   recuperacioncorreo,
+  revalidarTokenCorreo
 };

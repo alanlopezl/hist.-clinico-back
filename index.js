@@ -2,23 +2,30 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const cors = require('cors');
+require('dotenv').config();
 
+const {db} = require('./config/nonexion');
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+let puerto = process.env.PUERTO;
 app.use(cors());
-
-// Configurar CORS
-app.use((req, res, next) => {
-    res.header ('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Headers', 'Authorization, X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Request-Method');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
-    res.header('Allow', 'GET, POST, OPTIONS, PUT, DELETE');
-    next();
-});
 
 app.use(require('./routes/routes'));
 
-app.listen(3000);
+const conectar = async () => {
+    try {
+        await db.authenticate();
+        console.log('Conexión exitosa!');
 
-console.log('se levanto');
+      } catch (error) {
+        console.error(error);
+    }
+}
+
+conectar();
+
+// Correr server
+app.listen(puerto, () => {
+    console.log(`Corriendo en el puerto ${puerto}`)
+}); 

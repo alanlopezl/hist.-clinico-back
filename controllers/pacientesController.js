@@ -1,5 +1,9 @@
 const { response, request } = require("express");
 const db = require("../config/config");
+const CuestionarioPaciente = require("../models/tbl_paciente_cuestionario");
+const EnfermedadPaciente = require("../models/tbl_paciente_enfermedad");
+const ViewCuestionarioPaciente = require("../models/view_paciente_cuestionario");
+const ViewEnfermedadPaciente = require("../models/view_paciente_enfermedad");
 
 const Select = async (req = request, res = response) => {
   let { busqueda } = req.query;
@@ -37,7 +41,6 @@ const SelectCuestio = async (req = request, res = response) => {
   });
 };
 
-
 const SelectEnfer = async (req = request, res = response) => {
 
   let consulta = `SELECT * FROM tbl_enfermedad`;
@@ -59,26 +62,24 @@ const InsertMedico = async (req = require, res = response) => {
   let data = req.body;
 
   let verificacion = "select * from tbl_persona where DNI = ?";
-  let consulta = `INSERT INTO tbl_persona (ID_TIPO_PERSONA,PRIMER_NOMBRE, SEGUNDO_NOMBRE, PRIMER_APELLIDO, SEGUNDO_APELLIDO, DNI, FEC_NACIMIENTO, SEXO)
-    VALUES(?,upper(?),upper(?),upper(?),upper(?),?,?,?)`;
+  let consulta = `INSERT INTO tbl_persona (ID_TIPO_PERSONA,PRIMER_NOMBRE, SEGUNDO_NOMBRE, PRIMER_APELLIDO, SEGUNDO_APELLIDO, DNI, FEC_NACIMIENTO, SEXO, EDAD, EMAIL, EST_CIVIL, TELEFONO, OCUPACION, CONTACTO_EMERGENCIA, CONTACTO_EMER_TEL, OBSERVACIONES, DIRECCION)
+    VALUES(?,upper(?),upper(?),upper(?),upper(?),?,?,?,?,?, ?, ?, ?, ?, ?, ?, ?)`;
 
-        // VALIDAR DNI Y TÉLEFONO FOCK
-        if(data.dni.includes('0000000000000')) {
-          return res.json({
-            msg: true,
-            ok: false,
-            msg: `No se permiten solo 0 en DNI.`,
-          });
-        }
-   
+  // VALIDAR DNI Y TÉLEFONO FOCK
+  if (data.dni.includes("0000000000000")) {
+    return res.json({
+      msg: true,
+      ok: false,
+      msg: `No se permiten solo 0 en DNI.`,
+    });
+  }
+
   await db.query(verificacion, [data.dni], (error, results) => {
     if (results.length > 0) {
       return res.json({
         ok: false,
         msg: "Ya existe una persona con el DNI " + data.dni,
       });
-
-    
     }
     db.query(
       consulta,
@@ -91,6 +92,15 @@ const InsertMedico = async (req = require, res = response) => {
         data.dni,
         data.nacimiento,
         data.sexo,
+        data.edad,
+        data.email,
+        data.civil,
+        data.tel,
+        data.ocupacion,
+        data.cont_emer,
+        data.emer_tel,
+        data.obs,
+        data.dir,
       ],
       (error, results) => {
         if (error) {
@@ -108,64 +118,92 @@ const InsertMedico = async (req = require, res = response) => {
   });
 };
 
+const getAnswers = async (req = require, res = response) => {
+  let {idPaciente} = req.params;
+
+  try {
+
+    let respuestas = await ViewCuestionarioPaciente.findAndCountAll({where: {COD_PERSONA: idPaciente}});
+    let enfermedades = await ViewEnfermedadPaciente.findAll({where: {COD_PERSONA: idPaciente}})
+    
+    res.json({
+      ok: true,
+      respuestas,
+      enfermedades
+    })
+
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({
+      ok: false,
+      msg: 'Error interno del servidor, hable con el administrador',
+    });
+  }
+}
+
 const Insert = async (req = require, res = response) => {
-  
   let data = req.body;
 
+  let { cuest, enfer, idPaciente } = data;
 
-  let { cuest,enfer } = data;
+  // DESTRUIR TODOOOOOO LO ANTERIOR :D! MUAJAJAJA
+  await CuestionarioPaciente.destroy({
+    where: {
+      COD_PERSONA: idPaciente
+    }
+  })
+
+  await EnfermedadPaciente.destroy({
+    where: {
+      COD_PERSONA: idPaciente
+    }
+  })
 
   let consulta = `INSERT INTO tbl_persona_cuestionario (ID_CUESTIONARIO, COD_PERSONA, RESP)VALUES ? `;
   let consulta1 = `INSERT INTO tbl_enfermedad_paciente (COD_PERSONA, ID_ENFERMEDAD, RESP) VALUES ? `;
 
-  
+  console.log(cuest);
 
-  let todo = [];
-  let todo1 = [];
+  let todoCuestionario = [];
+  let todoEnfermedad = [];
 
   for (let i = 0; i < cuest.length; i++) {
-    todo.push([cuest[i].id,cuest[i].paciente, cuest[i].value]);
+    todoCuestionario.push([cuest[i].id, cuest[i].paciente, cuest[i].value]);
   }
 
   for (let i = 0; i < enfer.length; i++) {
-    todo1.push([enfer[i].paciente,enfer[i].id, enfer[i].value]);
+    todoEnfermedad.push([enfer[i].paciente, enfer[i].id, enfer[i].value]);
   }
 
-    db.query(consulta,[todo],(error, results1) => {
+  db.query(consulta, [todoCuestionario], (error, results1) => {
+    if (error) {
+      return res.json({
+        ok: false,
+        data: error,
+      });
+    }
+
+    // Evitar fallos si no llega nada
+    if(todoEnfermedad.length > 0) {
+      db.query(consulta1, [todoEnfermedad], (error, results) => {
         if (error) {
           return res.json({
             ok: false,
             data: error,
           });
         }
-        
-        
-    db.query(consulta1,[todo1],(error, results) => {
-      if (error) {
-        return res.json({
-          ok: false,
-          data: error,
-        });
-      }
-
-      return res.json({
-        ok:true
-      })
-      
+  
+      });
     }
-  );
-
-
-      }
-    );
+    return res.json({
+      ok: true,
+    });
+  });
 };
 const UpdatePaciente = (req = request, res = response) => {
-
   let consulta = `UPDATE tbl_persona SET ID_TIPO_PERSONA = ?, PRIMER_NOMBRE=upper(?),SEGUNDO_NOMBRE=upper(?), PRIMER_APELLIDO=upper(?), SEGUNDO_APELLIDO=upper(?), DNI=?,FEC_NACIMIENTO=?, SEXO=? WHERE COD_PERSONA=?`;
 
   let data = req.body;
-
-   
 
   db.query(
     consulta,
@@ -196,7 +234,6 @@ const UpdatePaciente = (req = request, res = response) => {
   );
 };
 const Delete = (req = request, res = response) => {
-
   let consulta = "DELETE FROM tbl_persona WHERE COD_PERSONA=?";
   let id = req.params.id;
 
@@ -208,7 +245,7 @@ const Delete = (req = request, res = response) => {
       data: results,
     });
   });
-}
+};
 
 module.exports = {
   Select,
@@ -217,5 +254,6 @@ module.exports = {
   Insert,
   Delete,
   UpdatePaciente,
-  SelectEnfer
+  SelectEnfer,
+  getAnswers
 };

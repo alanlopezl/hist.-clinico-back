@@ -21,7 +21,7 @@ const Select = (req = request, res = response) => {
 
 const Selectid = (req = request, res = response) => {
   let { id } = req.params;
-  let consulta = `select te.* from tbl_especialidad_medico tem inner join tbl_especialidad te on tem.ID_ESPECIALIDAD = te.ID_ESPECIALIDAD where tem.COD_PERSONA = ?`;
+  let consulta = `select te.*, tem.ID from tbl_especialidad_medico tem inner join tbl_especialidad te on tem.ID_ESPECIALIDAD = te.ID_ESPECIALIDAD where tem.COD_PERSONA = ?`;
   db.query(consulta, [id], (error, results) => {
     if (error) {
       return res.json({
@@ -148,6 +148,21 @@ const Delete = (req = request, res = response) => {
   });
 };
 
+const DeleteFromMedic = (req = request, res = response) => {
+  let consulta = "DELETE FROM tbl_especialidad_medico WHERE ID=?";
+  let id = req.params.id;
+  console.log(id)
+  console.log('holaaaa')
+  db.query(consulta, [id], (error, results) => {
+    if (error) return res.json({ ok: false, data: error });
+
+    return res.json({
+      ok: true,
+      data: results,
+    });
+  });
+};
+
 module.exports = {
   Select,
   Insert,
@@ -155,4 +170,5 @@ module.exports = {
   Delete,
   Selectid,
   InsertMedico,
+  DeleteFromMedic
 };

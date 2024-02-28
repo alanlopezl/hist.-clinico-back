@@ -6,12 +6,11 @@ const db = mysql.createPool({
     queueLimit :0,
     host: 'localhost',
     user: 'root',
-    password: '',
-    database: 'historial_clinico(7)',
-    port: '3306',
+    password: 'root',
+    database: 'historial_clinico',
+    port: '3308',
     wait_timeout : 28800,
     connect_timeout :10
 });
-
 
 module.exports = db;

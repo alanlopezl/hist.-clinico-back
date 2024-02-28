@@ -1,13 +1,15 @@
 const { response, request } = require("express");
 const db = require("../config/config");
+let bcrypt = require('bcryptjs');
+const generator = require('generate-password');
 const nodemailer = require("nodemailer");
 
 const Select = (req = request, res = response) => {
   let {busqueda} = req.query;
   let consulta = `SELECT u.*,CONCAT(p.PRIMER_NOMBRE,' ',p.SEGUNDO_NOMBRE,' ',p.PRIMER_APELLIDO,' ',p.SEGUNDO_APELLIDO) AS PERSONA,r.NOMBRE_ROL
     FROM tbl_ms_usuario u INNER JOIN tbl_persona p ON u.COD_PERSONA = p.COD_PERSONA
-    inner join tbl_ms_rol r on u.ID_ROL = r.ID_ROL where UPPER(u.USUARIO) like '%${busqueda}%' or UPPER(u.EMAIL) like '%${busqueda}%' or UPPER(CONCAT(p.PRIMER_NOMBRE,' ',p.SEGUNDO_NOMBRE,' ',p.PRIMER_APELLIDO,' ',p.SEGUNDO_APELLIDO)) like '%${busqueda}%' or UPPER(r.NOMBRE_ROL) like '%${busqueda}%' order by u.id_usuario desc`;
-    
+    inner join tbl_ms_rol r on u.ID_ROL = r.ID_ROL where (UPPER(u.USUARIO) like '%${busqueda}%' or UPPER(u.EMAIL) like '%${busqueda}%' or UPPER(CONCAT(p.PRIMER_NOMBRE,' ',p.SEGUNDO_NOMBRE,' ',p.PRIMER_APELLIDO,' ',p.SEGUNDO_APELLIDO)) like '%${busqueda}%' or UPPER(r.NOMBRE_ROL) like '%${busqueda}%') and p.ID_TIPO_PERSONA = 1 order by u.id_usuario desc`;
+
   db.query(consulta, (error, results) => {
     if (error) {
       return res.json({
@@ -62,6 +64,8 @@ const Insert = async (req = require, res = response) => {
   let verificacion = "select * from tbl_ms_usuario where USUARIO = ?";
   let data = req.body;
 
+
+  
   await db.query(verificacion, [data.usuario], (error, results) => {
 
 
@@ -72,9 +76,20 @@ const Insert = async (req = require, res = response) => {
       });
     }
 
+    console.log('hola')
+
+    const password = generator.generate({
+      length: 8,
+      numbers: true,
+      uppercase: true,
+      symbols: true,
+      exclude: '|[]*\\`&°~^><}{',
+      strict: true,
+    })
+
     db.query(
       consulta,
-      [data.idpersona, data.rol, data.usuario, data.correo, "Hola1234@"],
+      [data.idpersona, data.rol, data.usuario.toUpperCase(), data.correo, password],
       (error, results) => {
         if (error) {
           return res.json({
