@@ -15,6 +15,10 @@ app.put('/pacientes', verifyToken,controller.UpdatePaciente);
 app.post('/cuestionario',verifyToken, controller.Insert);
 app.post('/pacientes',verifyToken, controller.InsertMedico);
 
+// ODONTOGRAMA
+app.get('/tratamientos', controller.getTratamientos);
+app.get('/estado_diente', controller.getEstadoDiente);
+
 
 
 module.exports = app;

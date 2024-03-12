@@ -4,6 +4,8 @@ const CuestionarioPaciente = require("../models/tbl_paciente_cuestionario");
 const EnfermedadPaciente = require("../models/tbl_paciente_enfermedad");
 const ViewCuestionarioPaciente = require("../models/view_paciente_cuestionario");
 const ViewEnfermedadPaciente = require("../models/view_paciente_enfermedad");
+const Tratamiento = require("../models/tbl_mo_tratamiento");
+const EstadoDiente = require("../models/tbl_estado_diente");
 
 const Select = async (req = request, res = response) => {
   let { busqueda } = req.query;
@@ -247,6 +249,43 @@ const Delete = (req = request, res = response) => {
   });
 };
 
+
+// ODONTOGRAMA - TRATAMIENTO
+const getTratamientos = async (req = request, res = response) => {
+  console.log('hola')
+  try {
+    let tratamientos = await Tratamiento.findAll();
+    return res.json({
+      ok: true,
+      tratamientos
+    })
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({
+      ok: false,
+      msg: 'Error interno del servidor, hable con el administrador',
+    });
+  }
+};
+
+const getEstadoDiente = async (req = request, res = response) => {
+
+  try {
+    let estado = await EstadoDiente.findAll({order: ['COMPLETO']});
+
+    return res.json({
+      ok: true,
+      estado
+    })
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({
+      ok: false,
+      msg: 'Error interno del servidor, hable con el administrador',
+    });
+  }
+};
+
 module.exports = {
   Select,
   SelectCuestio,
@@ -255,5 +294,7 @@ module.exports = {
   Delete,
   UpdatePaciente,
   SelectEnfer,
-  getAnswers
+  getAnswers,
+  getTratamientos,
+  getEstadoDiente
 };
