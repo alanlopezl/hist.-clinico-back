@@ -6,6 +6,12 @@ const ViewCuestionarioPaciente = require("../models/view_paciente_cuestionario")
 const ViewEnfermedadPaciente = require("../models/view_paciente_enfermedad");
 const Tratamiento = require("../models/tbl_mo_tratamiento");
 const EstadoDiente = require("../models/tbl_estado_diente");
+const Odontrograma = require("../models/tbl_odontograma");
+const BitacoraPaciente = require("../models/tbl_mo_diente_historial");
+const { Op } = require("sequelize");
+const ViewOdontrograma = require("../models/view_mo_odontograma");
+const pdfMakePrinter = require('pdfmake/src/printer');
+const nodemailer = require('nodemailer');
 
 const Select = async (req = request, res = response) => {
   let { busqueda } = req.query;
@@ -286,6 +292,234 @@ const getEstadoDiente = async (req = request, res = response) => {
   }
 };
 
+const getDientesOdontograma = async (req = request, res = response) => {
+  let {idPaciente} = req.params;
+  try {
+    const dientes = await ViewOdontrograma.findAll({
+      where: {
+        ID_PERSONA: idPaciente
+      }
+    })
+
+    return res.json({
+      ok: true,
+      dientes
+    })
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({
+      ok: false,
+      msg: 'Error interno del servidor, hable con el administrador',
+    });
+  }
+};
+
+const postDienteOdontograma = async (req = request, res = response) => {
+
+  let {tratamiento, lado, numeroDiente, idEstado, idPaciente, observacion} = req.body;
+  console.log(idEstado)
+  try {
+    // Instanciar los estados
+    const estadoDiente = await EstadoDiente.findByPk(idEstado);
+    if (estadoDiente.COMPLETO) {
+      // Eliminar todos los registros existentes
+      await Odontrograma.destroy({where: {
+        [Op.and]: [
+          { ID_PERSONA: idPaciente },
+          { INDICE_DIENTE: numeroDiente }
+        ]
+      }})
+
+      // Guardar todos los lados
+      await Odontrograma.bulkCreate([
+        {
+          ID_PERSONA: idPaciente, LADO_DIENTE: "Arriba", INDICE_DIENTE: numeroDiente, OBSERVACION: observacion, ID_ESTADO: idEstado, ID_TRATAMIENTO: tratamiento,
+        }, 
+        {
+          ID_PERSONA: idPaciente, LADO_DIENTE: "Derecha", INDICE_DIENTE: numeroDiente, OBSERVACION: observacion, ID_ESTADO: idEstado, ID_TRATAMIENTO: tratamiento,
+        }, 
+        {
+          ID_PERSONA: idPaciente, LADO_DIENTE: "Abajo", INDICE_DIENTE: numeroDiente, OBSERVACION: observacion, ID_ESTADO: idEstado, ID_TRATAMIENTO: tratamiento,
+        }, 
+        {
+          ID_PERSONA: idPaciente, LADO_DIENTE: "Izquierda", INDICE_DIENTE: numeroDiente, OBSERVACION: observacion, ID_ESTADO: idEstado, ID_TRATAMIENTO: tratamiento,
+        }, 
+        {
+          ID_PERSONA: idPaciente, LADO_DIENTE: "Centro", INDICE_DIENTE: numeroDiente, OBSERVACION: observacion, ID_ESTADO: idEstado, ID_TRATAMIENTO: tratamiento
+        }
+      ])
+    } else {
+
+      // Revisar registros anteriores
+      const diente = await Odontrograma.findOne({where: {
+        INDICE_DIENTE: numeroDiente
+      }})
+
+      if(diente) {
+        const estadoDiente = await EstadoDiente.findByPk(diente.ID_ESTADO);
+        if(estadoDiente.COMPLETO) {
+          // Eliminar todos los registros del diente
+          await Odontrograma.destroy({where: {
+            [Op.and]: [
+              { ID_PERSONA: idPaciente },
+              { INDICE_DIENTE: numeroDiente }
+            ]
+          }})
+        } else {
+          // Eliminar el registro existente del lado
+          await Odontrograma.destroy({where: {
+            [Op.and]: [
+              { ID_PERSONA: idPaciente },
+              { INDICE_DIENTE: numeroDiente },
+              { LADO_DIENTE: lado }
+            ]
+          }})
+        }
+      }
+
+      
+
+      // Guardar solo el lado seleccionado
+      await Odontrograma.create({
+        ID_PERSONA: idPaciente, LADO_DIENTE: lado, INDICE_DIENTE: numeroDiente, OBSERVACION: observacion, ID_ESTADO: idEstado, ID_TRATAMIENTO: tratamiento
+      })
+    }
+
+    // Guardar en bitácora del diente
+    const tratamientoSeleccionado = await Tratamiento.findByPk(tratamiento);
+    console.log(tratamientoSeleccionado)
+    if (estadoDiente.COMPLETO) {
+
+      // Guardar todos los lados
+      await BitacoraPaciente.bulkCreate([
+        {
+          LADO: "Arriba", ID_PACIENTE: idPaciente, NUMERO_DIENTE: numeroDiente, OBSERVACION: observacion, ESTADO: estadoDiente.NOMBRE, TRATAMIENTO: tratamientoSeleccionado.NOMBRE,
+        },
+        {
+          LADO: "Derecha", ID_PACIENTE: idPaciente, NUMERO_DIENTE: numeroDiente, OBSERVACION: observacion, ESTADO: estadoDiente.NOMBRE, TRATAMIENTO: tratamientoSeleccionado.NOMBRE,
+        },
+        {
+          LADO: "Abajo", ID_PACIENTE: idPaciente, NUMERO_DIENTE: numeroDiente, OBSERVACION: observacion, ESTADO: estadoDiente.NOMBRE, TRATAMIENTO: tratamientoSeleccionado.NOMBRE,
+        },
+        {
+          LADO: "Izquierda", ID_PACIENTE: idPaciente, NUMERO_DIENTE: numeroDiente, OBSERVACION: observacion, ESTADO: estadoDiente.NOMBRE, TRATAMIENTO: tratamientoSeleccionado.NOMBRE,
+        },
+        {
+          LADO: "Centro", ID_PACIENTE: idPaciente, NUMERO_DIENTE: numeroDiente, OBSERVACION: observacion, ESTADO: estadoDiente.NOMBRE, TRATAMIENTO: tratamientoSeleccionado.NOMBRE
+        }
+      ])
+    } else {
+      // Guardar solo el lado seleccionado
+      await BitacoraPaciente.create({
+        LADO: lado, ID_PACIENTE: idPaciente, NUMERO_DIENTE: numeroDiente, OBSERVACION: observacion, ESTADO: estadoDiente.NOMBRE, TRATAMIENTO: tratamientoSeleccionado.NOMBRE
+      })
+    }
+
+    return res.json({
+      ok: true,
+      msg: "Información guardada con éxito"
+    })
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({
+      ok: false,
+      msg: 'Error interno del servidor, hable con el administrador',
+    });
+  }
+};
+
+const getHistorialDiente = async (req = request, res = response) => {
+  let {idPaciente, lado, numDiente} = req.params
+  try {
+    let historial = await BitacoraPaciente.findAll({
+      where : {
+        [Op.and]: [
+          { ID_PACIENTE: idPaciente },
+          { LADO: lado },
+          { NUMERO_DIENTE: numDiente }
+        ]
+      },
+      order: [
+        ['ID', 'DESC']
+      ]
+    });
+
+    return res.json({
+      ok: true,
+      historial
+    })
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({
+      ok: false,
+      msg: 'Error interno del servidor, hable con el administrador',
+    });
+  }
+};
+
+const generarPresupuesto = async (req = request, res = response) => {
+  let {idPaciente} = req.params
+  try {
+    const Op = require('sequelize').Op;
+    let presupuesto = [];
+
+    ViewOdontrograma.findAll({
+      where: {
+        ID_PERSONA: idPaciente
+      }
+    }).then(result => {
+      let filteredResult = [];
+      let indices = new Set();
+
+      for (let item of result) {
+        if (item.COMPLETO === true) {
+          if (!indices.has(item.INDICE_DIENTE)) {
+            indices.add(item.INDICE_DIENTE);
+            filteredResult.push(item);
+          }
+        } else {
+          filteredResult.push(item);
+        }
+      }
+
+      presupuesto = filteredResult;
+
+      let total = 0.0;
+      presupuesto.forEach(tratamiento => {
+        total += parseFloat(tratamiento.precio_tratamiento)
+      })
+      return res.json({
+        ok: true,
+        presupuesto,
+        total
+      })
+    }).catch(err => {
+      console.error(err);
+    });
+
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({
+      ok: false,
+      msg: 'Error interno del servidor, hable con el administrador',
+    });
+  }
+};
+
+const mandarPresupuesto = async (req = request, res = response) => {
+  let {html} = req.body
+  try {
+    
+
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({
+      ok: false,
+      msg: 'Error interno del servidor, hable con el administrador',
+    });
+  }
+};
+
 module.exports = {
   Select,
   SelectCuestio,
@@ -296,5 +530,10 @@ module.exports = {
   SelectEnfer,
   getAnswers,
   getTratamientos,
-  getEstadoDiente
+  getEstadoDiente,
+  postDienteOdontograma,
+  getHistorialDiente,
+  getDientesOdontograma,
+  generarPresupuesto,
+  mandarPresupuesto
 };

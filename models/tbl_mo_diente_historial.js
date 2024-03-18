@@ -3,36 +3,36 @@ const { DataTypes } = require('sequelize')
 const { db } = require('../config/nonexion')
 
 
-const Odontrograma = db.define(`odontogram`, {
-    ID_ODONTOGRAMA: {
+const BitacoraPaciente = db.define(`tbl_mo_bitacora_paciente`, {
+    ID: {
         type: DataTypes.INTEGER,
         primaryKey: true
     },
-    ID_PERSONA: {
+    ID_PACIENTE: {
         type: DataTypes.INTEGER,
     },
-    LADO_DIENTE: {
+    FECHA: {
+        type: DataTypes.DATE,
+    },
+    LADO: {
         type: DataTypes.STRING
     },
-    INDICE_DIENTE: {
+    NUMERO_DIENTE: {
         type: DataTypes.STRING,
     },
     OBSERVACION: {
         type: DataTypes.STRING
     },
-    FECHA: {
-        type: DataTypes.DATE,
+    TRATAMIENTO: {
+        type: DataTypes.STRING
     },
-    ID_TRATAMIENTO: {
-        type: DataTypes.INTEGER
-    },
-    ID_ESTADO: {
-        type: DataTypes.INTEGER
+    ESTADO: {
+        type: DataTypes.STRING
     }
 }, {
-    tableName: 'odontogram',
+    tableName: 'tbl_mo_bitacora_paciente',
     timestamps: false,
 })
 
 //Para exportar el modelo
-module.exports = Odontrograma;
+module.exports = BitacoraPaciente;

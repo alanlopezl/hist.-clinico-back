@@ -18,6 +18,10 @@ app.post('/pacientes',verifyToken, controller.InsertMedico);
 // ODONTOGRAMA
 app.get('/tratamientos', controller.getTratamientos);
 app.get('/estado_diente', controller.getEstadoDiente);
+app.post('/odontograma', controller.postDienteOdontograma);
+app.get('/diente/historial/:idPaciente/:lado/:numDiente', controller.getHistorialDiente);
+app.get('/diente/odontograma/:idPaciente', controller.getDientesOdontograma);
+app.get('/odontograma/presupuesto/:idPaciente', controller.generarPresupuesto);
 
 
 
