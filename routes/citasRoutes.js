@@ -7,6 +7,7 @@ const {verifyToken} = require('../middlewares/VerifiyToken');
 //CRUD 
 app.get('/cita',verifyToken, controller.Select);  //MOSTRAR
 app.get('/cita/:id/:espe',verifyToken, controller.Selectidespe);  //MOSTRAR
+app.get('/cita/all/citas/pacientes',verifyToken, controller.SelectAll);  //MOSTRAR ALL
 
 app.post('/cita',verifyToken, controller.Insert); //CREAR
 app.put('/cita',verifyToken, controller.Update);  //  ACCTUALIZAR

@@ -209,10 +209,11 @@ const Insert = async (req = require, res = response) => {
   });
 };
 const UpdatePaciente = (req = request, res = response) => {
-  let consulta = `UPDATE tbl_persona SET ID_TIPO_PERSONA = ?, PRIMER_NOMBRE=upper(?),SEGUNDO_NOMBRE=upper(?), PRIMER_APELLIDO=upper(?), SEGUNDO_APELLIDO=upper(?), DNI=?,FEC_NACIMIENTO=?, SEXO=? WHERE COD_PERSONA=?`;
+
+  let consulta = `UPDATE tbl_persona SET ID_TIPO_PERSONA = ?, PRIMER_NOMBRE=upper(?),SEGUNDO_NOMBRE=upper(?), PRIMER_APELLIDO=upper(?), SEGUNDO_APELLIDO=upper(?), DNI=?,FEC_NACIMIENTO=?, SEXO=?, EDAD=?, EMAIL=?, EST_CIVIL=?, TELEFONO=?, OCUPACION=?, CONTACTO_EMERGENCIA=?, CONTACTO_EMER_TEL=?, OBSERVACIONES=?, DIRECCION =? WHERE COD_PERSONA=? `;
 
   let data = req.body;
-
+  console.log(req.body)
   db.query(
     consulta,
     [
@@ -224,6 +225,15 @@ const UpdatePaciente = (req = request, res = response) => {
       data.dni,
       data.nacimiento,
       data.sexo,
+      data.edad,
+      data.email,
+      data.civil,
+      data.tel,
+      data.ocupacion,
+      data.cont_emer,
+      data.emer_tel,
+      data.obs,
+      data.dir,
       data.id,
     ],
     (error, results) => {

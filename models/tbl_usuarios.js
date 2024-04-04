@@ -8,17 +8,17 @@ const Usuarios = db.define(`tbl_ms_usuario`, {
         type: DataTypes.INTEGER,
         primaryKey: true
     },
-    ID_PERSONA: {
+    COD_PERSONA: {
         type: DataTypes.INTEGER,
     },
     USUARIO: {
         type: DataTypes.STRING
     },
-    ESTADO: {
-        type: DataTypes.STRING,
+    ID_ESTADO: {
+        type: DataTypes.INTEGER,
         default: true
     },
-    CONTRASEÑA: {
+    PASSWORDD: {
         type: DataTypes.STRING
     },
     ID_ROL: {

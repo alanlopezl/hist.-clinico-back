@@ -69,9 +69,11 @@ const Update = async(req = request, res=response) => {
     let consulta = 'UPDATE tbl_cuestionario SET NOMBRE=? WHERE ID_CUESTIONARIO = ?';
 
     let data = req.body;
+    console.log(data);
     await db.query(verificacion, [data.nombre], (error, results)=>{
 
         if(results.length>0){
+            console.log(results)
             return res.json({
                 ok: false,
                 msg:'Ya existe un nombre'
