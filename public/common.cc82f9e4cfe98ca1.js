@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkFrontEnd_Historial_Clinico=self.webpackChunkFrontEnd_Historial_Clinico||[]).push([[592],{553:(s,n,e)=>{e.d(n,{N:()=>o});const o={production:!1,url:"http://ec2-18-224-32-235.us-east-2.compute.amazonaws.com:8080/"}}}]);

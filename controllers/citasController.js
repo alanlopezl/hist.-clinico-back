@@ -7,6 +7,8 @@ const hbs = require('nodemailer-express-handlebars');
 // Importar librerias de fechas
 const dayjs = require('dayjs');
 const localizedFormat = require('dayjs/plugin/localizedFormat');
+const Usuarios = require('../models/tbl_usuarios');
+const Citas = require('../models/tbl_citas');
 
 const Select = (req = request, res=response) => {
     let {busqueda} = req.query;
@@ -26,11 +28,16 @@ const Select = (req = request, res=response) => {
     });
 }
 
-const Selectid = (req = request, res=response) => {
+const Selectid = async (req = request, res=response) => {
+    console.log('holaaaa');
     let {busqueda} = req.query;
-    let consulta = `SELECT * FROM tbl_citas where UPPER(MOTIVO) LIKE '%${busqueda.toUpperCase()}%'`;
-     db.query(consulta, (error, results) => {
+    let {idMedico} = req.params;
+    let medico = await Usuarios.findByPk(idMedico);
+    let consulta = `select * from tbl_citas tc inner join tbl_persona tp on tc.ID_PACIENTE = tp.COD_PERSONA INNER JOIN tbl_estado_cita tec ON tc.ID_ESTADO_CITA = tec.ID_ESTADO_CITA  where UPPER(MOTIVO) LIKE '%${busqueda.toUpperCase()}%' AND ID_MEDICO = ${medico.COD_PERSONA} ORDER BY FECHA_CITA DESC`;
+    console.log(consulta) 
+    db.query(consulta, (error, results) => {
 
+        console.log(results)
         if (error) {
             return res.json({
                 ok: false,
@@ -59,6 +66,8 @@ const Selectidespe = (req = request, res=response) => {
    
      db.query(consulta, [id,espe],(error, results) => {
 
+        print(consulta)
+
         if (error) {
             return res.json({
                 ok: false,
@@ -77,7 +86,7 @@ const SelectAll = (req = request, res=response) => {
     let { busqueda } = req.query;
 
     console.log('FUCK');
-     let consulta = `select tp.*, tc.*, tm.PRIMER_NOMBRE AS MEDICO_NOMBRE, tm.PRIMER_APELLIDO AS MEDICO_APELLIDO from tbl_citas tc inner join tbl_persona tp on tc.ID_PACIENTE = tp.COD_PERSONA INNER JOIN tbl_persona tm ON tc.ID_MEDICO = tm.COD_PERSONA`;
+     let consulta = `select tp.*, tc.*, tec.*, tm.PRIMER_NOMBRE AS MEDICO_NOMBRE, tm.PRIMER_APELLIDO AS MEDICO_APELLIDO from tbl_citas tc inner join tbl_persona tp on tc.ID_PACIENTE = tp.COD_PERSONA INNER JOIN tbl_persona tm ON tc.ID_MEDICO = tm.COD_PERSONA INNER JOIN tbl_estado_cita tec ON tc.ID_ESTADO_CITA = tec.ID_ESTADO_CITA ORDER BY tc.FECHA_CITA DESC`;
         
      if (busqueda != ''){
        consulta = consulta + ` where UPPER(tp.PRIMER_NOMBRE) LIKE '%${busqueda.toUpperCase()}%' or UPPER(tp.PRIMER_NOMBRE) LIKE '' or UPPER(tm.PRIMER_NOMBRE) LIKE '%${busqueda.toUpperCase()}%'`
@@ -151,39 +160,88 @@ const Insert = async(req = require, res = response)=>{
 
 const Update = async(req = request, res=response) => {
 
-    let verificacion = "select * from tbl_ms_rol where NOMBRE_ROL = ?";
-    let consulta = 'UPDATE tbl_ms_rol SET NOMBRE_ROL=?, FECHA_MODIFICACION=? WHERE ID_ROL = ?';
+    let consulta = 'UPDATE tbl_citas SET MOTIVO=?, FECHA_CITA=?, ID_ESTADO_CITA = ? WHERE ID_CITA = ?';
 
     let data = req.body;
-    await db.query(verificacion, [data.rol], (error, results)=>{
+    db.query(consulta, [data.motivo,data.fecha,data.estado, data.id], (error,results)=>{
 
-        if(results.length>0){
+        if (error) {
             return res.json({
                 ok: false,
-                msg:'Ya existe una cita con ese nombre'
+                data: error
             });
         }
 
-        db.query(consulta, [data.rol,new Date(),data.id], (error,results)=>{
-
-            if (error) {
-                return res.json({
-                    ok: false,
-                    data: error
-                });
-            }
-    
-            return res.json({
-                ok: true,
-                data: results
-            });
-    
+        return res.json({
+            ok: true,
+            data: results
         });
-    
-      
 
     });
 
+   
+}
+
+const updateStatusDate = async(req = request, res=response) => {
+
+    let consulta = 'UPDATE tbl_citas SET ID_ESTADO_CITA = ? WHERE ID_CITA = ?';
+
+    let {estado, id} = req.body;
+    db.query(consulta, [estado, id], (error,results)=>{
+
+        if (error) {
+            return res.json({
+                ok: false,
+                data: error
+            });
+        }
+
+        return res.json({
+            ok: true,
+            data: results
+        });
+
+    });
+   
+}
+
+const updateStatusDateByClient = async(req = request, res=response) => {
+
+    let {id, fecha} = req;
+    let {status} = req.body
+
+    const cita = await Citas.findByPk(id);
+
+    if(cita.ID_ESTADO_CITA == 2) {
+        return res.json({
+            ok: false,
+            msg: 'Su cita ya fue confirmada'
+        })
+    }
+
+    if(cita.ID_ESTADO_CITA == 3) {
+        return res.json({
+            ok: false,
+            msg: 'Su cita ya fue rechazada'
+        })
+    }  
+    
+    if(cita.ID_ESTADO_CITA != 1) {
+        return res.json({
+            ok: false,
+            msg: `Su cita no puede ser ${status == 2 ? 'confirmada' : 'rechazada'}`
+        })
+    }
+
+    await cita.update({
+        ID_ESTADO_CITA: status
+    })
+
+    return res.json({
+        ok: true,
+        msg: "",
+        fecha
+    })
    
 }
 /*
@@ -227,5 +285,8 @@ module.exports = {
     Insert,
     Update,
     Delete,
-    Selectidespe
+    Selectidespe,
+    Selectid,
+    updateStatusDate,
+    updateStatusDateByClient
 }

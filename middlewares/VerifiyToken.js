@@ -92,4 +92,40 @@ const validarCorreoJWT = async (req = request, res = response, next) => {
     next();
 
 }
-module.exports = { verifyToken, validarCorreoJWT }
+
+// Validar Token de correo
+const validarClientMailJWT = async (req = request, res = response, next) => {
+
+    // Leer token desde los params
+    const { token } = req.params;
+
+    try {
+
+        // Usa semilla de correo
+        const { id, fecha } = jwt.verify( token, 'clinicacliente1234.' );
+        req.id = id;
+        req.fecha = fecha;
+
+    } catch (error) {
+
+        // Error de token expirado
+        if( error instanceof jwt.TokenExpiredError ) {
+            return res.json({
+                ok: false,
+                msg: 'Token expirado'
+            })
+        }
+
+        // Token modificado o no válido
+        return res.json({
+            ok: false,
+            msg: 'Token no válido'
+        })
+    }
+
+    //TODO OK!
+    next();
+
+}
+
+module.exports = { verifyToken, validarCorreoJWT, validarClientMailJWT }
