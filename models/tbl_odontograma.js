@@ -28,6 +28,9 @@ const Odontrograma = db.define(`odontogram`, {
     },
     ID_ESTADO: {
         type: DataTypes.INTEGER
+    },
+    ID_ESTADO_ODONTOGRAMA: {
+        type: DataTypes.INTEGER
     }
 }, {
     tableName: 'odontogram',

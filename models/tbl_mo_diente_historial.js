@@ -28,6 +28,9 @@ const BitacoraPaciente = db.define(`tbl_mo_bitacora_paciente`, {
     },
     ESTADO: {
         type: DataTypes.STRING
+    },
+    ESTADO_PROCESO: {
+        type: DataTypes.STRING
     }
 }, {
     tableName: 'tbl_mo_bitacora_paciente',

@@ -41,6 +41,9 @@ const ViewOdontrograma = db.define(`view_mo_odontograma`, {
     nombre_tratamiento: {
         type: DataTypes.STRING
     },
+    NOMBRE_ESTADO: {
+        type: DataTypes.STRING
+    },
     precio_tratamiento: {
         type: DataTypes.DECIMAL
     }

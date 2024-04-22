@@ -8,7 +8,7 @@ const Tratamiento = require("../models/tbl_mo_tratamiento");
 const EstadoDiente = require("../models/tbl_estado_diente");
 const Odontrograma = require("../models/tbl_odontograma");
 const BitacoraPaciente = require("../models/tbl_mo_diente_historial");
-const { Op } = require("sequelize");
+const { Op , Sequelize} = require("sequelize");
 const ViewOdontrograma = require("../models/view_mo_odontograma");
 const pdfMakePrinter = require('pdfmake/src/printer');
 const nodemailer = require('nodemailer');
@@ -16,6 +16,42 @@ const nodemailer = require('nodemailer');
 const Select = async (req = request, res = response) => {
   let { busqueda } = req.query;
   let consulta = `SELECT * FROM tbl_persona where  ID_TIPO_PERSONA = 2 order by COD_PERSONA DESC`;
+
+  await db.query(consulta, (error, results) => {
+    if (error) {
+      return res.json({
+        ok: false,
+        msg: error,
+      });
+    }
+    return res.json({
+      ok: true,
+      data: results,
+    });
+  });
+};
+
+const SelectTratamientos = async (req = request, res = response) => {
+  let { busqueda } = req.query;
+  let consulta = `SELECT * FROM tbl_mo_tratamiento`;
+
+  await db.query(consulta, (error, results) => {
+    if (error) {
+      return res.json({
+        ok: false,
+        msg: error,
+      });
+    }
+    return res.json({
+      ok: true,
+      data: results,
+    });
+  });
+};
+
+const SelectEstadosDientes = async (req = request, res = response) => {
+  let { busqueda } = req.query;
+  let consulta = `SELECT * FROM estado_diente`;
 
   await db.query(consulta, (error, results) => {
     if (error) {
@@ -304,13 +340,30 @@ const getEstadoDiente = async (req = request, res = response) => {
 
 const getDientesOdontograma = async (req = request, res = response) => {
   let {idPaciente} = req.params;
+  let {fecha} = req.query;
+  console.log(`fecha: ${fecha}`)
+  let partesFecha = fecha.split("-");
+  let fechaObj = new Date(partesFecha[0], partesFecha[1] - 1, partesFecha[2]);
+  let year = fechaObj.getFullYear();
+  let month = fechaObj.getMonth() + 1; // Los meses en JavaScript empiezan en 0
+  let day = fechaObj.getDate();
+
+  console.log(year)
+  console.log(month)
+  console.log(day)
+
   try {
     const dientes = await ViewOdontrograma.findAll({
       where: {
-        ID_PERSONA: idPaciente
+        ID_PERSONA: idPaciente,
+        [Op.and]: [
+          Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('FECHA')), year),
+          Sequelize.where(Sequelize.fn('MONTH', Sequelize.col('FECHA')), month),
+          Sequelize.where(Sequelize.fn('DAY', Sequelize.col('FECHA')), day)
+        ]
       }
     })
-
+  
     return res.json({
       ok: true,
       dientes
@@ -326,8 +379,17 @@ const getDientesOdontograma = async (req = request, res = response) => {
 
 const postDienteOdontograma = async (req = request, res = response) => {
 
-  let {tratamiento, lado, numeroDiente, idEstado, idPaciente, observacion} = req.body;
+  let {lado, numeroDiente, idEstado, idPaciente, observacion, fecha} = req.body;
   console.log(idEstado)
+  console.log(`fecha post: ${fecha}`)
+  let partesFecha = fecha.split("-");
+  let fechaObj = new Date(partesFecha[0], partesFecha[1] - 1, partesFecha[2]);
+  let year = fechaObj.getFullYear();
+  let month = fechaObj.getMonth() + 1; // Los meses en JavaScript empiezan en 0
+  let day = fechaObj.getDate();
+  if(!observacion) {
+    observacion = ""
+  }
   try {
     // Instanciar los estados
     const estadoDiente = await EstadoDiente.findByPk(idEstado);
@@ -336,26 +398,29 @@ const postDienteOdontograma = async (req = request, res = response) => {
       await Odontrograma.destroy({where: {
         [Op.and]: [
           { ID_PERSONA: idPaciente },
-          { INDICE_DIENTE: numeroDiente }
+          { INDICE_DIENTE: numeroDiente },
+          Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('FECHA')), year),
+          Sequelize.where(Sequelize.fn('MONTH', Sequelize.col('FECHA')), month),
+          Sequelize.where(Sequelize.fn('DAY', Sequelize.col('FECHA')), day)
         ]
       }})
 
       // Guardar todos los lados
       await Odontrograma.bulkCreate([
         {
-          ID_PERSONA: idPaciente, LADO_DIENTE: "Arriba", INDICE_DIENTE: numeroDiente, OBSERVACION: observacion, ID_ESTADO: idEstado, ID_TRATAMIENTO: tratamiento,
+          ID_PERSONA: idPaciente, LADO_DIENTE: "Arriba", INDICE_DIENTE: numeroDiente, OBSERVACION: observacion, ID_ESTADO: idEstado, FECHA: fecha,
         }, 
         {
-          ID_PERSONA: idPaciente, LADO_DIENTE: "Derecha", INDICE_DIENTE: numeroDiente, OBSERVACION: observacion, ID_ESTADO: idEstado, ID_TRATAMIENTO: tratamiento,
+          ID_PERSONA: idPaciente, LADO_DIENTE: "Derecha", INDICE_DIENTE: numeroDiente, OBSERVACION: observacion, ID_ESTADO: idEstado, FECHA: fecha,
         }, 
         {
-          ID_PERSONA: idPaciente, LADO_DIENTE: "Abajo", INDICE_DIENTE: numeroDiente, OBSERVACION: observacion, ID_ESTADO: idEstado, ID_TRATAMIENTO: tratamiento,
+          ID_PERSONA: idPaciente, LADO_DIENTE: "Abajo", INDICE_DIENTE: numeroDiente, OBSERVACION: observacion, ID_ESTADO: idEstado, FECHA: fecha,
         }, 
         {
-          ID_PERSONA: idPaciente, LADO_DIENTE: "Izquierda", INDICE_DIENTE: numeroDiente, OBSERVACION: observacion, ID_ESTADO: idEstado, ID_TRATAMIENTO: tratamiento,
+          ID_PERSONA: idPaciente, LADO_DIENTE: "Izquierda", INDICE_DIENTE: numeroDiente, OBSERVACION: observacion, ID_ESTADO: idEstado, FECHA: fecha,
         }, 
         {
-          ID_PERSONA: idPaciente, LADO_DIENTE: "Centro", INDICE_DIENTE: numeroDiente, OBSERVACION: observacion, ID_ESTADO: idEstado, ID_TRATAMIENTO: tratamiento
+          ID_PERSONA: idPaciente, LADO_DIENTE: "Centro", INDICE_DIENTE: numeroDiente, OBSERVACION: observacion, ID_ESTADO: idEstado, FECHA: fecha
         }
       ])
     } else {
@@ -372,7 +437,10 @@ const postDienteOdontograma = async (req = request, res = response) => {
           await Odontrograma.destroy({where: {
             [Op.and]: [
               { ID_PERSONA: idPaciente },
-              { INDICE_DIENTE: numeroDiente }
+              { INDICE_DIENTE: numeroDiente },
+              Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('FECHA')), year),
+              Sequelize.where(Sequelize.fn('MONTH', Sequelize.col('FECHA')), month),
+              Sequelize.where(Sequelize.fn('DAY', Sequelize.col('FECHA')), day)
             ]
           }})
         } else {
@@ -381,7 +449,10 @@ const postDienteOdontograma = async (req = request, res = response) => {
             [Op.and]: [
               { ID_PERSONA: idPaciente },
               { INDICE_DIENTE: numeroDiente },
-              { LADO_DIENTE: lado }
+              { LADO_DIENTE: lado },
+              Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('FECHA')), year),
+              Sequelize.where(Sequelize.fn('MONTH', Sequelize.col('FECHA')), month),
+              Sequelize.where(Sequelize.fn('DAY', Sequelize.col('FECHA')), day)
             ]
           }})
         }
@@ -391,43 +462,176 @@ const postDienteOdontograma = async (req = request, res = response) => {
 
       // Guardar solo el lado seleccionado
       await Odontrograma.create({
-        ID_PERSONA: idPaciente, LADO_DIENTE: lado, INDICE_DIENTE: numeroDiente, OBSERVACION: observacion, ID_ESTADO: idEstado, ID_TRATAMIENTO: tratamiento
+        ID_PERSONA: idPaciente, LADO_DIENTE: lado, INDICE_DIENTE: numeroDiente, OBSERVACION: observacion, ID_ESTADO: idEstado, FECHA: fecha
       })
     }
 
     // Guardar en bitácora del diente
-    const tratamientoSeleccionado = await Tratamiento.findByPk(tratamiento);
-    console.log(tratamientoSeleccionado)
+
     if (estadoDiente.COMPLETO) {
 
       // Guardar todos los lados
       await BitacoraPaciente.bulkCreate([
         {
-          LADO: "Arriba", ID_PACIENTE: idPaciente, NUMERO_DIENTE: numeroDiente, OBSERVACION: observacion, ESTADO: estadoDiente.NOMBRE, TRATAMIENTO: tratamientoSeleccionado.NOMBRE,
+          LADO: "Arriba", ID_PACIENTE: idPaciente, NUMERO_DIENTE: numeroDiente, OBSERVACION: observacion, ESTADO: estadoDiente.NOMBRE, 
         },
         {
-          LADO: "Derecha", ID_PACIENTE: idPaciente, NUMERO_DIENTE: numeroDiente, OBSERVACION: observacion, ESTADO: estadoDiente.NOMBRE, TRATAMIENTO: tratamientoSeleccionado.NOMBRE,
+          LADO: "Derecha", ID_PACIENTE: idPaciente, NUMERO_DIENTE: numeroDiente, OBSERVACION: observacion, ESTADO: estadoDiente.NOMBRE, 
         },
         {
-          LADO: "Abajo", ID_PACIENTE: idPaciente, NUMERO_DIENTE: numeroDiente, OBSERVACION: observacion, ESTADO: estadoDiente.NOMBRE, TRATAMIENTO: tratamientoSeleccionado.NOMBRE,
+          LADO: "Abajo", ID_PACIENTE: idPaciente, NUMERO_DIENTE: numeroDiente, OBSERVACION: observacion, ESTADO: estadoDiente.NOMBRE, 
         },
         {
-          LADO: "Izquierda", ID_PACIENTE: idPaciente, NUMERO_DIENTE: numeroDiente, OBSERVACION: observacion, ESTADO: estadoDiente.NOMBRE, TRATAMIENTO: tratamientoSeleccionado.NOMBRE,
+          LADO: "Izquierda", ID_PACIENTE: idPaciente, NUMERO_DIENTE: numeroDiente, OBSERVACION: observacion, ESTADO: estadoDiente.NOMBRE, 
         },
         {
-          LADO: "Centro", ID_PACIENTE: idPaciente, NUMERO_DIENTE: numeroDiente, OBSERVACION: observacion, ESTADO: estadoDiente.NOMBRE, TRATAMIENTO: tratamientoSeleccionado.NOMBRE
+          LADO: "Centro", ID_PACIENTE: idPaciente, NUMERO_DIENTE: numeroDiente, OBSERVACION: observacion, ESTADO: estadoDiente.NOMBRE, 
         }
       ])
     } else {
       // Guardar solo el lado seleccionado
       await BitacoraPaciente.create({
-        LADO: lado, ID_PACIENTE: idPaciente, NUMERO_DIENTE: numeroDiente, OBSERVACION: observacion, ESTADO: estadoDiente.NOMBRE, TRATAMIENTO: tratamientoSeleccionado.NOMBRE
+        LADO: lado, ID_PACIENTE: idPaciente, NUMERO_DIENTE: numeroDiente, OBSERVACION: observacion, ESTADO: estadoDiente.NOMBRE
       })
     }
 
     return res.json({
       ok: true,
       msg: "Información guardada con éxito"
+    })
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({
+      ok: false,
+      msg: 'Error interno del servidor, hable con el administrador',
+    });
+  }
+};
+
+const putTratamientoDienteOdontograma = async (req = request, res = response) => {
+
+  let {lado, numeroDiente, idPaciente, idTratamiento, fecha} = req.body;
+
+  console.log(`fecha post: ${fecha}`)
+  let partesFecha = fecha.split("-");
+  let fechaObj = new Date(partesFecha[0], partesFecha[1] - 1, partesFecha[2]);
+  let year = fechaObj.getFullYear();
+  let month = fechaObj.getMonth() + 1; // Los meses en JavaScript empiezan en 0
+  let day = fechaObj.getDate();
+
+  try {
+    // Instanciar los estados
+    const diente = await Odontrograma.findOne({where: {
+      [Op.and]: [
+        { ID_PERSONA: idPaciente },
+        { INDICE_DIENTE: numeroDiente },
+        Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('FECHA')), year),
+        Sequelize.where(Sequelize.fn('MONTH', Sequelize.col('FECHA')), month),
+        Sequelize.where(Sequelize.fn('DAY', Sequelize.col('FECHA')), day)
+      ]
+    }})
+    const estadoDiente = await EstadoDiente.findByPk(diente.ID_ESTADO);
+    if (estadoDiente.COMPLETO) {
+      // Eliminar todos los registros existentes
+      await Odontrograma.update({
+        ID_TRATAMIENTO: idTratamiento
+      }, {where: {
+        [Op.and]: [
+          { ID_PERSONA: idPaciente },
+          { INDICE_DIENTE: numeroDiente },
+          Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('FECHA')), year),
+          Sequelize.where(Sequelize.fn('MONTH', Sequelize.col('FECHA')), month),
+          Sequelize.where(Sequelize.fn('DAY', Sequelize.col('FECHA')), day)
+        ]
+      }})
+    } else {
+
+      await Odontrograma.update({
+        ID_TRATAMIENTO: idTratamiento
+      },{where: {
+        [Op.and]: [
+          { ID_PERSONA: idPaciente },
+          { INDICE_DIENTE: numeroDiente },
+          { LADO_DIENTE: lado },
+          Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('FECHA')), year),
+          Sequelize.where(Sequelize.fn('MONTH', Sequelize.col('FECHA')), month),
+          Sequelize.where(Sequelize.fn('DAY', Sequelize.col('FECHA')), day)
+        ]
+      }})
+    }
+
+    // Guardar en bitácora del diente
+
+    return res.json({
+      ok: true,
+      msg: "Información guardada con éxito"
+    })
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({
+      ok: false,
+      msg: 'Error interno del servidor, hable con el administrador',
+    });
+  }
+};
+
+const putEstadoProcesoDienteOdontograma = async (req = request, res = response) => {
+
+  let {lado, numeroDiente, idPaciente, fecha} = req.body;
+  console.log('hola')
+  console.log(`fecha post: ${fecha}`)
+  let partesFecha = fecha.split("-");
+  let fechaObj = new Date(partesFecha[0], partesFecha[1] - 1, partesFecha[2]);
+  let year = fechaObj.getFullYear();
+  let month = fechaObj.getMonth() + 1; // Los meses en JavaScript empiezan en 0
+  let day = fechaObj.getDate();
+
+  try {
+    // Instanciar los estados
+    const diente = await Odontrograma.findOne({where: {
+      [Op.and]: [
+        { ID_PERSONA: idPaciente },
+        { INDICE_DIENTE: numeroDiente },
+        Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('FECHA')), year),
+        Sequelize.where(Sequelize.fn('MONTH', Sequelize.col('FECHA')), month),
+        Sequelize.where(Sequelize.fn('DAY', Sequelize.col('FECHA')), day)
+      ]
+    }})
+    const estadoDiente = await EstadoDiente.findByPk(diente.ID_ESTADO);
+    if (estadoDiente.COMPLETO) {
+      // Eliminar todos los registros existentes
+      await Odontrograma.update({
+        ID_ESTADO_ODONTOGRAMA: 2
+      }, {where: {
+        [Op.and]: [
+          { ID_PERSONA: idPaciente },
+          { INDICE_DIENTE: numeroDiente },
+          Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('FECHA')), year),
+          Sequelize.where(Sequelize.fn('MONTH', Sequelize.col('FECHA')), month),
+          Sequelize.where(Sequelize.fn('DAY', Sequelize.col('FECHA')), day)
+        ]
+      }})
+    } else {
+
+      await Odontrograma.update({
+        ID_ESTADO_ODONTOGRAMA: 2
+      },{where: {
+        [Op.and]: [
+          { ID_PERSONA: idPaciente },
+          { INDICE_DIENTE: numeroDiente },
+          { LADO_DIENTE: lado },
+          Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('FECHA')), year),
+          Sequelize.where(Sequelize.fn('MONTH', Sequelize.col('FECHA')), month),
+          Sequelize.where(Sequelize.fn('DAY', Sequelize.col('FECHA')), day)
+        ]
+      }})
+    }
+
+    // Guardar en bitácora del diente
+
+    return res.json({
+      ok: true,
+      msg: "Proceso finalizado con éxito"
     })
   } catch (error) {
     console.log(error)
@@ -467,15 +671,74 @@ const getHistorialDiente = async (req = request, res = response) => {
   }
 };
 
+const getInfoDienteFecha = async (req = request, res = response) => {
+  let {idPaciente, lado, numDiente} = req.params
+  let {fecha} = req.query
+  console.log(`fecha: ${fecha}`)
+  let partesFecha = fecha.split("-");
+  let fechaObj = new Date(partesFecha[0], partesFecha[1] - 1, partesFecha[2]);
+  let year = fechaObj.getFullYear();
+  let month = fechaObj.getMonth() + 1; // Los meses en JavaScript empiezan en 0
+  let day = fechaObj.getDate();
+  try {
+    let info = await ViewOdontrograma.findOne({
+      where : {
+        [Op.and]: [
+          { ID_PERSONA: idPaciente },
+          { LADO_DIENTE: lado },
+          { INDICE_DIENTE: numDiente },
+          Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('FECHA')), year),
+          Sequelize.where(Sequelize.fn('MONTH', Sequelize.col('FECHA')), month),
+          Sequelize.where(Sequelize.fn('DAY', Sequelize.col('FECHA')), day)
+        ]
+      }
+    });
+
+    if(!info) {
+      info = {
+        NOMBRE: "",
+        nombre_tratamiento: "",
+        OBSERVACION: "",
+        ESTADO_NOMBRE: ""
+      }
+    }
+    return res.json({
+      ok: true,
+      info
+    })
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({
+      ok: false,
+      msg: 'Error interno del servidor, hable con el administrador',
+    });
+  }
+};
+
 const generarPresupuesto = async (req = request, res = response) => {
   let {idPaciente} = req.params
+  let {fecha} = req.query
   try {
     const Op = require('sequelize').Op;
     let presupuesto = [];
 
+    let partesFecha = fecha.split("-");
+    let fechaObj = new Date(partesFecha[0], partesFecha[1] - 1, partesFecha[2]);
+    let year = fechaObj.getFullYear();
+    let month = fechaObj.getMonth() + 1; // Los meses en JavaScript empiezan en 0
+    let day = fechaObj.getDate();
+
     ViewOdontrograma.findAll({
       where: {
-        ID_PERSONA: idPaciente
+        ID_PERSONA: idPaciente,
+        ID_TRATAMIENTO: {
+          [Op.ne]: null
+        },
+        [Op.and]: [
+          Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('FECHA')), year),
+          Sequelize.where(Sequelize.fn('MONTH', Sequelize.col('FECHA')), month),
+          Sequelize.where(Sequelize.fn('DAY', Sequelize.col('FECHA')), day)
+        ]
       }
     }).then(result => {
       let filteredResult = [];
@@ -545,5 +808,10 @@ module.exports = {
   getHistorialDiente,
   getDientesOdontograma,
   generarPresupuesto,
-  mandarPresupuesto
+  mandarPresupuesto,
+  getInfoDienteFecha,
+  putTratamientoDienteOdontograma,
+  putEstadoProcesoDienteOdontograma,
+  SelectTratamientos,
+  SelectEstadosDientes 
 };
