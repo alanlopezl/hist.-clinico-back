@@ -40,6 +40,7 @@ const Insert = async(req = require, res = response)=>{
         }
 
          db.query(consulta, [data.rol,new Date()], (error, results)=>{
+            console.log(error)
 
             if (error) {
                 return res.json({

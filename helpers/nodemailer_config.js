@@ -8,7 +8,7 @@ const crearTransporteSMTP = async() => {
 		secure: true,
 		auth: {
 			user: "lomasdentalcenter@gmail.com", // generated ethereal user
-            pass: "oqmsmkspaztvsmwt", // generated ethereal password
+            pass: "fmnhjopyeitwrmfe", // generated ethereal password
 		}
 	})
 }
