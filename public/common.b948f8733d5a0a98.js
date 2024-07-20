@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkFrontEnd_Historial_Clinico=self.webpackChunkFrontEnd_Historial_Clinico||[]).push([[592],{553:(o,n,e)=>{e.d(n,{N:()=>t});const t={production:!1,url:"http://www.dentalcent.com/"}}}]);

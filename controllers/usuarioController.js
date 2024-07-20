@@ -112,7 +112,7 @@ const Insert = async (req = require, res = response) => {
           secure: false, // true for 465, false for other ports
           auth: {
             user: "lomasdentalcenter@gmail.com", // generated ethereal user
-            pass: "oqmsmkspaztvsmwt", // generated ethereal password
+            pass: "fmnhjopyeitwrmfe", // generated ethereal password
           },
         });
 
@@ -266,7 +266,7 @@ const Update = (req = request, res = response) => {
   let consulta = `UPDATE tbl_ms_usuario
     SET COD_PERSONA=?,
     ID_ROL=?,
-     USUARIO=?,
+
     EMAIL=?,
     FECHA_MODIFICACION=?,
      ID_ESTADO=?
@@ -278,7 +278,7 @@ const Update = (req = request, res = response) => {
     [
       data.idpersona,
       data.rol,
-      data.usuario,
+
       data.correo,
       new Date(),
       data.estado,

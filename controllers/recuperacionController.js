@@ -15,6 +15,7 @@ const Recupreguntas = async (req = require, res = response) => {
     [data.pregunta, data.respuesta, data.usuario],
     (error, results) => {
       if (error) {
+
         return res.json({
           ok: false,
           data: error,
@@ -32,17 +33,22 @@ const recuperacioncorreo = async (req = require, res = response) => {
   let consulta = `call RecuCorreoElectronico(?)`;
 
   let data = req.body;
+console.log('holaaaaaaaaaaaaaaaaa');
+  console.log(data);
   //regresaar el usuario
   await db.query(consulta, [data.correo], (error, results) => {
+console.log('holaasdadasda');
     if (error) {
+console.log(error);
       return res.json({
         ok: false,
         data: error,
       });
     }
     let { codigo } = desects(results);
-
+console.log('prueba'+codigo);
     if (codigo === 1) {
+console.log('hola');
         return res.json({
             ok: false,
             data: "No existe el usuario",
@@ -58,7 +64,7 @@ const recuperacioncorreo = async (req = require, res = response) => {
       secure: false, // true for 465, false for other ports
       auth: {
         user: "lomasdentalcenter@gmail.com", // generated ethereal user
-        pass: "oqmsmkspaztvsmwt", // generated ethereal password
+        pass: "fmnhjopyeitwrmfe", // generated ethereal password
       },
     });
 

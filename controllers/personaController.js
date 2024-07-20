@@ -297,7 +297,7 @@ const InsertUserPersona = async (req = require, res = response) => {
       secure: false, // true for 465, false for other ports
       auth: {
         user: "lomasdentalcenter@gmail.com", // generated ethereal user
-        pass: "oqmsmkspaztvsmwt", // generated ethereal password
+        pass: "fmnhjopyeitwrmfe", // generated ethereal password
       },
     });
 
